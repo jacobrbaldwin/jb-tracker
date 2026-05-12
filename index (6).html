@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="water.attack.">
+<meta name="theme-color" content="#1e2850">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>water.attack.</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#f5f4f0;--surface:#fff;--border:#D3D1C7;--border-light:#edecea;
+  --text:#1a1a18;--muted:#888780;--hint:#B4B2A9;
+  --purple:#7F77DD;--purple-light:#EEEDFE;--purple-dark:#3C3489;
+  --amber:#EF9F27;--amber-light:#FAC775;--amber-dark:#633806;
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+  --coral:#D85A30;--coral-light:#FAECE7;--coral-dark:#993C1D;
+  --blue:#378ADD;--blue-light:#E6F1FB;--blue-dark:#185FA5;
+  --navy:#1e2850;--radius:12px;--radius-sm:8px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text);overflow-x:hidden;}
+body{padding-top:var(--safe-top);}
+
+/* HEADER */
+.app-header{background:var(--navy);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.app-title{font-size:17px;font-weight:700;letter-spacing:0.01em;}
+.app-subtitle{font-size:11px;opacity:0.65;margin-top:1px;}
+.header-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+.header-btn:active{background:rgba(255,255,255,0.25);}
+
+/* TABS */
+.tabs-wrap{background:var(--navy);padding:0 12px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:6px 14px;border-radius:99px;border:1.5px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.tab.active{background:#fff;border-color:#fff;color:var(--navy);}
+.tab-sub{font-size:10px;opacity:0.75;}
+
+/* WEEK BAR */
+.week-bar{background:var(--navy);padding:0 16px 14px;display:flex;align-items:center;gap:10px;}
+.week-prog-wrap{flex:1;height:5px;background:rgba(255,255,255,0.2);border-radius:99px;overflow:hidden;}
+.week-prog-fill{height:100%;background:var(--amber);border-radius:99px;transition:width 0.4s;}
+.week-label{font-size:11px;color:rgba(255,255,255,0.6);white-space:nowrap;}
+
+/* MAIN SCROLL */
+.main{padding:12px 12px 100px;max-width:600px;margin:0 auto;}
+
+/* DAY CARD */
+.day-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}
+.section-hdr{padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--border);}
+
+/* TASK ROW */
+.task-row{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;user-select:none;transition:background 0.1s;}
+.task-row:last-child{border-bottom:none;}
+.task-row:active{background:#f9f8f5;}
+.task-row.done .task-text{text-decoration:line-through;color:var(--hint);}
+.task-row.done .task-detail{color:var(--hint);}
+.cb{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--hint);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.task-row.done .cb{background:var(--purple);border-color:var(--purple);}
+.cb-check{color:#fff;font-size:13px;display:none;}
+.task-row.done .cb-check{display:block;}
+.task-content{flex:1;min-width:0;}
+.task-text{font-size:14px;color:var(--text);line-height:1.4;}
+.task-detail{font-size:12px;color:var(--muted);margin-top:2px;}
+.task-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
+.tag{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;}
+.tag-timer{background:var(--blue-light);color:var(--blue-dark);}
+.tag-school{background:var(--purple-light);color:var(--purple-dark);}
+.tag-chore{background:var(--green-light);color:var(--green-dark);}
+.tag-workout{background:var(--coral-light);color:var(--coral-dark);}
+.tag-baseball{background:#FAC775;color:var(--amber-dark);}
+.tag-free{background:var(--green-light);color:var(--green-dark);}
+.tag-practice{background:#FBEAF0;color:#993556;}
+.task-time{font-size:11px;color:var(--hint);white-space:nowrap;flex-shrink:0;margin-top:3px;}
+
+/* INLINE INPUTS */
+.inline-input{display:block;width:100%;margin-top:4px;font-size:13px;border:none;outline:none;border-bottom:1.5px dashed var(--hint);background:transparent;color:var(--text);padding:2px 0;}
+.inline-input::placeholder{color:var(--hint);}
+
+/* DAY PROGRESS */
+.day-prog-row{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--bg);border-top:1px solid var(--border);}
+.day-prog-bar{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.day-prog-fill{height:100%;background:var(--purple);border-radius:99px;transition:width 0.3s;}
+.day-prog-label{font-size:11px;color:var(--muted);white-space:nowrap;}
+
+/* PRIZE SECTION */
+.prize-section{margin-top:4px;}
+.prize-title{font-size:13px;font-weight:700;color:var(--text);margin:16px 0 8px;}
+.prize-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px;}
+.prize-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border-light);}
+.prize-row:last-child{border-bottom:none;}
+.prize-icon{font-size:24px;flex-shrink:0;width:32px;text-align:center;}
+.prize-info{flex:1;}
+.prize-name{font-size:13px;font-weight:700;color:var(--text);}
+.prize-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.prize-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap;flex-shrink:0;}
+.badge-locked{background:var(--bg);color:var(--hint);border:1px solid var(--border);}
+.badge-earned{background:var(--green-light);color:var(--green-dark);}
+.badge-progress{background:var(--purple-light);color:var(--purple-dark);}
+.prize-bar-wrap{padding:4px 14px 12px;}
+.prize-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prize-bar-fill{height:100%;border-radius:99px;transition:width 0.4s;}
+.fill-purple{background:var(--purple);}
+.fill-amber{background:var(--amber);}
+.fill-coral{background:var(--coral);}
+.streak-dots{display:flex;gap:6px;margin-top:6px;}
+.streak-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);}
+.streak-dot.filled{background:var(--amber);border-color:#BA7517;}
+.streak-dot.current{background:var(--purple);border-color:var(--purple-dark);}
+
+/* PARENT MODE */
+.parent-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center;}
+.parent-overlay.open{display:flex;}
+.parent-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;padding:20px 20px calc(20px + var(--safe-bottom));max-height:85vh;overflow-y:auto;}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 16px;}
+.sheet-title{font-size:17px;font-weight:700;margin-bottom:16px;}
+.pin-input-wrap{display:flex;gap:8px;justify-content:center;margin:20px 0;}
+.pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:var(--bg);}
+.pin-dot.filled{background:var(--navy);border-color:var(--navy);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:0 auto;}
+.pin-btn{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:20px;font-weight:600;cursor:pointer;text-align:center;}
+.pin-btn:active{background:var(--border);}
+.pin-error{text-align:center;color:#D85A30;font-size:13px;margin-top:12px;min-height:20px;}
+.parent-section{margin-bottom:20px;}
+.parent-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:10px;}
+.edit-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-light);}
+.edit-label{font-size:13px;color:var(--text);flex:1;}
+.edit-input{font-size:13px;border:1px solid var(--border);border-radius:6px;padding:6px 10px;background:var(--bg);color:var(--text);width:160px;outline:none;}
+.streak-ctrl{display:flex;align-items:center;gap:10px;}
+.streak-num{font-size:18px;font-weight:700;color:var(--navy);min-width:20px;text-align:center;}
+.ctrl-btn{background:var(--bg);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.ctrl-btn:active{background:var(--border);}
+.supabase-row{margin-bottom:12px;}
+.supabase-label{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.supabase-input{width:100%;font-size:12px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--bg);color:var(--text);outline:none;font-family:monospace;}
+.save-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+.save-btn:active{opacity:0.85;}
+.sync-status{font-size:11px;color:var(--muted);text-align:center;margin-top:8px;}
+.close-btn{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
+
+/* INSTALL BANNER */
+.install-banner{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:13px;}
+.install-banner button{background:var(--amber);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.install-banner .dismiss{background:transparent;color:rgba(255,255,255,0.5);padding:6px;font-size:18px;}
+
+/* KID MODE CELEBRATION */
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+.popped{animation:pop 0.25s ease;}
+</style>
+</head>
+<body>
+
+<div id="install-banner" class="install-banner" style="display:none">
+  <span style="flex:1">Add to Home Screen for the best experience!</span>
+  <button id="install-btn">Install</button>
+  <button class="dismiss" onclick="document.getElementById('install-banner').style.display='none'">×</button>
+</div>
+
+<div class="app-header">
+  <div>
+    <div class="app-title">⛰️ water.attack.</div>
+    <div class="app-subtitle" id="header-date"></div>
+  </div>
+  <button class="header-btn" onclick="openParent()">⚙️ Parent</button>
+</div>
+
+<div class="tabs-wrap" id="tabs"></div>
+<div class="week-bar">
+  <div class="week-prog-wrap"><div class="week-prog-fill" id="week-fill" style="width:0%"></div></div>
+  <span class="week-label" id="week-label">Week: 0%</span>
+</div>
+
+<div class="main">
+  <div id="day-view"></div>
+  <div class="prize-section">
+    <div class="prize-title">🏆 Prize Tracker</div>
+    <div class="prize-card" id="prize-daily"></div>
+    <div class="prize-card" id="prize-weekly"></div>
+    <div class="prize-title" style="margin-top:12px">🔥 Streak</div>
+    <div class="prize-card" id="prize-streak"></div>
+    <div style="font-size:11px;color:var(--hint);text-align:center;margin-top:10px;">Tap tasks to check them off · prizes update live</div>
+  </div>
+</div>
+
+<!-- PARENT OVERLAY -->
+<div class="parent-overlay" id="parent-overlay" onclick="overlayClick(event)">
+  <div class="parent-sheet" id="parent-sheet">
+    <div class="sheet-handle"></div>
+
+    <!-- PIN SCREEN -->
+    <div id="pin-screen">
+      <div class="sheet-title" style="text-align:center">Parent Mode 🔒</div>
+      <div class="pin-input-wrap" id="pin-dots">
+        <div class="pin-dot" id="d0"></div>
+        <div class="pin-dot" id="d1"></div>
+        <div class="pin-dot" id="d2"></div>
+        <div class="pin-dot" id="d3"></div>
+      </div>
+      <div class="pin-pad">
+        <button class="pin-btn" onclick="pinPress('1')">1</button>
+        <button class="pin-btn" onclick="pinPress('2')">2</button>
+        <button class="pin-btn" onclick="pinPress('3')">3</button>
+        <button class="pin-btn" onclick="pinPress('4')">4</button>
+        <button class="pin-btn" onclick="pinPress('5')">5</button>
+        <button class="pin-btn" onclick="pinPress('6')">6</button>
+        <button class="pin-btn" onclick="pinPress('7')">7</button>
+        <button class="pin-btn" onclick="pinPress('8')">8</button>
+        <button class="pin-btn" onclick="pinPress('9')">9</button>
+        <button class="pin-btn" onclick="pinPress('back')" style="font-size:16px">⌫</button>
+        <button class="pin-btn" onclick="pinPress('0')">0</button>
+        <button class="pin-btn" onclick="pinPress('clear')" style="font-size:12px">CLR</button>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+    </div>
+
+    <!-- PARENT PANEL -->
+    <div id="parent-panel" style="display:none">
+      <div class="sheet-title">Parent Settings</div>
+
+      <div class="parent-section">
+        <div class="parent-section-title">Cloud Sync (Supabase)</div>
+        <div class="supabase-row">
+          <div class="supabase-label">Project URL</div>
+          <input class="supabase-input" id="supa-url" placeholder="https://xxxx.supabase.co" />
+        </div>
+        <div class="supabase-row">
+          <div class="supabase-label">Anon Key</div>
+          <input class="supabase-input" id="supa-key" placeholder="eyJhbGciOi..." />
+        </div>
+        <button class="save-btn" onclick="saveSupabase()">💾 Save & Sync</button>
+        <div class="sync-status" id="sync-status"></div>
+      </div>
+
+      <div class="parent-section">
+        <div class="parent-section-title">This Week's Chores</div>
+        <div class="edit-row"><span class="edit-label">Monday chore</span><input class="edit-input" id="chore-0" placeholder="e.g. sweep garage" /></div>
+        <div class="edit-row"><span class="edit-label">Tuesday chore</span><input class="edit-input" id="chore-1" placeholder="" /></div>
+        <div class="edit-row"><span class="edit-label">Wednesday chore</span><input class="edit-input" id="chore-2" placeholder="" /></div>
+        <div class="edit-row"><span class="edit-label">Thursday chore</span><input class="edit-input" id="chore-3" placeholder="" /></div>
+        <div class="edit-row"><span class="edit-label">Friday chore</span><input class="edit-input" id="chore-4" placeholder="" /></div>
+      </div>
+
+      <div class="parent-section">
+        <div class="parent-section-title">Wednesday IRAC Issue</div>
+        <div class="edit-row"><span class="edit-label">Issue topic</span><input class="edit-input" id="irac-topic" placeholder="e.g. self-defense" /></div>
+      </div>
+
+      <div class="parent-section">
+        <div class="parent-section-title">Batting Gloves Streak</div>
+        <div class="edit-row">
+          <span class="edit-label">Completed 90%+ weeks</span>
+          <div class="streak-ctrl">
+            <button class="ctrl-btn" onclick="adjustStreak(-1)">−</button>
+            <span class="streak-num" id="streak-num">0</span>
+            <button class="ctrl-btn" onclick="adjustStreak(1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveParent()">✅ Save Changes</button>
+      <button class="close-btn" onclick="closeParent()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab active" id="nav-schedule" onclick="switchView('schedule')">
+    <span class="nav-tab-icon">📅</span>Schedule
+  </button>
+  <button class="nav-tab" id="nav-drills" onclick="switchView('drills')">
+    <span class="nav-tab-icon">⚾</span>Hitting
+  </button>
+  <button class="nav-tab" id="nav-lift" onclick="switchView('lift')">
+    <span class="nav-tab-icon">💪</span>Lift
+  </button>
+  <button class="nav-tab" id="nav-throwing" onclick="switchView('throwing')">
+    <span class="nav-tab-icon">🎯</span>Throwing
+  </button>
+</div>
+
+<!-- DRILLS VIEW -->
+<div id="drills-view" style="display:none;">
+  <div class="drills-wrap" id="drills-inner"></div>
+</div>
+
+<!-- LIFT VIEW -->
+<div id="lift-view" style="display:none;">
+  <div class="drills-wrap" id="lift-inner"></div>
+</div>
+
+<!-- THROWING VIEW -->
+<div id="throwing-view" style="display:none;">
+  <div class="drills-wrap" id="throwing-inner"></div>
+</div>
+
+<script>
+// ─── SCHEDULE DATA ───────────────────────────────────────────────
+const days = [
+  { name:"Mon", date:"5/11", sections:[
+    { label:"Morning", tasks:[
+      { text:"Grateful Journal / Jesus Calling", time:"8:00" },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+      { text:"Breakfast" },
+    ]},
+    { label:"School Block 1", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Stretching w/ Mom", detail:"5 min", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"School Block 2", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Lunch" },
+      { text:"School Work (if needed)", tags:["school"] },
+      { text:"Reading", detail:"15 min", tags:["timer"] },
+      { text:"Writing", detail:"5 min or half page", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"Afternoon", tasks:[
+      { text:"Chore", chore:true, tags:["chore"] },
+      { text:"Pig pens & weigh", tags:["chore"] },
+      { text:"Workout", tags:["workout"] },
+      { text:"Driveline OR Hitting", detail:"20 min — pick one", tags:["baseball"] },
+      { text:"Fast Hands — 2x or 100 reps", detail:"1 min", tags:["baseball","timer"] },
+    ]},
+    { label:"Evening", tasks:[
+      { text:"Free Time", tags:["free"] },
+    ]},
+  ]},
+  { name:"Tue", date:"5/12", sections:[
+    { label:"Morning", tasks:[
+      { text:"Grateful Journal / Jesus Calling", time:"8:00" },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+      { text:"Breakfast" },
+      { text:"Class w/ Dad", detail:"15 min", tags:["school","timer"] },
+    ]},
+    { label:"School Block 1", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Stretching w/ Mom", detail:"5 min", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"School Block 2", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Lunch" },
+      { text:"School Work (if needed)", tags:["school"] },
+      { text:"Reading", detail:"15 min", tags:["timer"] },
+      { text:"Writing", detail:"5 min or half page", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"Afternoon", tasks:[
+      { text:"Chore", chore:true, tags:["chore"] },
+      { text:"Check / Feed Pigs", tags:["chore"] },
+      { text:"Trosky Rebounders — chest & nose down!", detail:"3 min / 1 min", tags:["baseball","timer"] },
+    ]},
+    { label:"Evening", tasks:[
+      { text:"Practice", tags:["practice"] },
+    ]},
+  ]},
+  { name:"Wed", date:"5/13", sections:[
+    { label:"Morning", tasks:[
+      { text:"Grateful Journal / Jesus Calling", time:"8:00" },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+      { text:"Breakfast" },
+    ]},
+    { label:"Morning Workout", tasks:[
+      { text:"Driveline Workout", tags:["baseball","workout"] },
+      { text:"Grounders w/ Dad!", tags:["baseball"] },
+    ]},
+    { label:"School Block 1", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Stretching", detail:"5 min", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"School Block 2", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Lunch" },
+      { text:"School Work (if needed)", tags:["school"] },
+      { text:"Reading", detail:"15 min", tags:["timer"] },
+      { text:"IRAC Writing — Issue:", irac:true, detail:"5 min or half page", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"Afternoon", tasks:[
+      { text:"Chore", chore:true, tags:["chore"] },
+      { text:"Check / Feed Pigs", tags:["chore"] },
+      { text:"Driveline OR Hitting", detail:"20 min — pick one", tags:["baseball"] },
+      { text:"Fast Hands — 2x or 100 reps", detail:"1 min", tags:["baseball","timer"] },
+      { text:"Rebounders", detail:"3 min / 1 min", tags:["baseball","timer"] },
+    ]},
+    { label:"Evening", tasks:[
+      { text:"Free Time", tags:["free"] },
+    ]},
+  ]},
+  { name:"Thu", date:"5/14", sections:[
+    { label:"Morning", tasks:[
+      { text:"Grateful Journal / Jesus Calling", time:"8:00" },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+      { text:"Breakfast" },
+      { text:"Class w/ Dad", detail:"15 min", tags:["school","timer"] },
+    ]},
+    { label:"School Block 1", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"School Block 2", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Lunch" },
+      { text:"Stretching w/ Mom", detail:"5 min", tags:["timer"] },
+      { text:"Reading", detail:"15 min", tags:["timer"] },
+      { text:"Writing", detail:"15 min or half page", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"Afternoon", tasks:[
+      { text:"Grounders w/ Dad!", tags:["baseball"] },
+      { text:"Chore", chore:true, tags:["chore"] },
+      { text:"Check / Feed Pigs", tags:["chore"] },
+    ]},
+    { label:"Evening", tasks:[
+      { text:"Practice", tags:["practice"] },
+    ]},
+  ]},
+  { name:"Fri", date:"5/15", sections:[
+    { label:"Morning", tasks:[
+      { text:"Grateful Journal / Jesus Calling", time:"8:00" },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+      { text:"Breakfast" },
+    ]},
+    { label:"Morning Workout", tasks:[
+      { text:"Driveline Workout", tags:["baseball","workout"] },
+      { text:"Grounders w/ Dad!", tags:["baseball"] },
+    ]},
+    { label:"School Block 1", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"School Block 2", tasks:[
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"School", detail:"29 min", tags:["school","timer"] },
+      { text:"Lunch" },
+      { text:"School Work (if needed)", tags:["school"] },
+      { text:"Stretching w/ Mom", detail:"5 min", tags:["timer"] },
+      { text:"Reading", detail:"15 min", tags:["timer"] },
+      { text:"Writing", detail:"15 min or half page", tags:["timer"] },
+      { text:"Snack" },
+    ]},
+    { label:"Afternoon", tasks:[
+      { text:"Chore", chore:true, tags:["chore"] },
+      { text:"Check / Feed Pigs", tags:["chore"] },
+      { text:"Driveline OR Hitting", detail:"20 min — pick one", tags:["baseball"] },
+      { text:"Trosky — Grounders", tags:["baseball"] },
+      { text:"Trosky — Rebounders", detail:"3 min / 1 min", tags:["baseball","timer"] },
+      { text:"Trosky — Fast Hands — 2x or 100 reps", detail:"1 min", tags:["baseball","timer"] },
+      { text:"Breathing", detail:"1 min", tags:["timer"] },
+    ]},
+    { label:"Evening", tasks:[
+      { text:"Free Time", tags:["free"] },
+    ]},
+  ]},
+];
+
+const tagDef = {
+  timer:   {cls:"tag-timer",   label:"⏱"},
+  school:  {cls:"tag-school",  label:"📚"},
+  chore:   {cls:"tag-chore",   label:"🌿"},
+  workout: {cls:"tag-workout", label:"💪"},
+  baseball:{cls:"tag-baseball",label:"⚾"},
+  free:    {cls:"tag-free",    label:"🌟"},
+  practice:{cls:"tag-practice",label:"🏟"},
+};
+
+// ─── STATE ──────────────────────────────────────────────────────
+let state = {
+  checked: {},   // {dayIndex: {taskIndex: bool}}
+  chores: ["","","","",""],
+  irac: "",
+  streak: 0,
+  supaUrl: "",
+  supaKey: "",
+};
+let activeDay = 0;
+
+// Init checked structure
+days.forEach((_,di) => {
+  state.checked[di] = {};
+  let idx = 0;
+  days[di].sections.forEach(s => s.tasks.forEach(() => { state.checked[di][idx++] = false; }));
+});
+
+// ─── SUPABASE SYNC ──────────────────────────────────────────────
+async function syncLoad() {
+  if (!state.supaUrl || !state.supaKey) return;
+  try {
+    const res = await fetch(state.supaUrl + '/rest/v1/tracker?id=eq.jackson&select=data', {
+      headers: {'apikey': state.supaKey, 'Authorization': 'Bearer ' + state.supaKey}
+    });
+    if (!res.ok) return;
+    const rows = await res.json();
+    if (rows.length && rows[0].data) {
+      const remote = rows[0].data;
+      if (remote.checked) state.checked = remote.checked;
+      if (remote.chores) state.chores = remote.chores;
+      if (remote.irac !== undefined) state.irac = remote.irac;
+      if (remote.streak !== undefined) state.streak = remote.streak;
+      document.getElementById('sync-status').textContent = 'Loaded from cloud ✓';
+    }
+  } catch(e) { console.log('sync load error', e); }
+}
+
+async function syncSave() {
+  if (!state.supaUrl || !state.supaKey) return;
+  const payload = { id: 'jackson', data: { checked: state.checked, chores: state.chores, irac: state.irac, streak: state.streak } };
+  try {
+    await fetch(state.supaUrl + '/rest/v1/tracker', {
+      method: 'POST',
+      headers: {
+        'apikey': state.supaKey,
+        'Authorization': 'Bearer ' + state.supaKey,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(payload)
+    });
+    document.getElementById('sync-status').textContent = 'Saved to cloud ✓ ' + new Date().toLocaleTimeString();
+  } catch(e) { document.getElementById('sync-status').textContent = 'Sync error — check URL/key'; }
+}
+
+// ─── LOCAL STORAGE ──────────────────────────────────────────────
+function localSave() {
+  try { localStorage.setItem('jb_state', JSON.stringify(state)); } catch(e){}
+}
+function localLoad() {
+  try {
+    const s = localStorage.getItem('jb_state');
+    if (s) { const parsed = JSON.parse(s); Object.assign(state, parsed); }
+  } catch(e){}
+}
+
+// ─── HELPERS ────────────────────────────────────────────────────
+function totalTasks(di) { return Object.keys(state.checked[di] || {}).length; }
+function doneTasks(di) { return Object.values(state.checked[di] || {}).filter(Boolean).length; }
+function dayPct(di) { const t = totalTasks(di); return t ? Math.round(doneTasks(di)/t*100) : 0; }
+function weekPct() {
+  let d=0,t=0; days.forEach((_,i)=>{d+=doneTasks(i);t+=totalTasks(i);}); return t?Math.round(d/t*100):0;
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────
+function renderTabs() {
+  document.getElementById('tabs').innerHTML = days.map((d,i) => {
+    const pct = dayPct(i);
+    return '<button class="tab'+(i===activeDay?' active':'')+'" onclick="setDay('+i+')">'+
+      d.name+'<br><span class="tab-sub">'+pct+'%</span></button>';
+  }).join('');
+}
+
+function renderWeekBar() {
+  const pct = weekPct();
+  document.getElementById('week-fill').style.width = pct+'%';
+  document.getElementById('week-label').textContent = 'Week: '+pct+'%';
+}
+
+function renderDay() {
+  const d = days[activeDay], di = activeDay;
+  let idx = 0, html = '';
+  d.sections.forEach(s => {
+    html += '<div class="day-card"><div class="section-hdr">'+s.label+'</div>';
+    s.tasks.forEach(t => {
+      const i = idx++, done = state.checked[di][i];
+      const choreVal = t.chore ? (state.chores[di]||'') : '';
+      const iracVal = t.irac ? (state.irac||'') : '';
+      html += '<div class="task-row'+(done?' done':'')+'" onclick="toggle('+di+','+i+',event)">';
+      html += '<div class="cb"><span class="cb-check">✓</span></div>';
+      html += '<div class="task-content">';
+      html += '<div class="task-text">'+t.text;
+      if (t.chore) html += ' <input class="inline-input" placeholder="write chore here" value="'+choreVal+'" onclick="event.stopPropagation()" oninput="state.chores['+di+']=this.value;saveAll()" />';
+      if (t.irac) html += ' <input class="inline-input" placeholder="write issue here" value="'+iracVal+'" onclick="event.stopPropagation()" oninput="state.irac=this.value;saveAll()" />';
+      html += '</div>';
+      if (t.detail) html += '<div class="task-detail">'+t.detail+'</div>';
+      if (t.tags && t.tags.length) {
+        html += '<div class="task-tags">';
+        t.tags.forEach(tag => { const td=tagDef[tag]; if(td) html += '<span class="tag '+td.cls+'">'+td.label+' '+tag+'</span>'; });
+        html += '</div>';
+      }
+      html += '</div>';
+      if (t.time) html += '<div class="task-time">'+t.time+'</div>';
+      html += '</div>';
+    });
+    const done=doneTasks(di), total=totalTasks(di), pct=total?Math.round(done/total*100):0;
+    html += '<div class="day-prog-row"><div class="day-prog-bar"><div class="day-prog-fill" style="width:'+pct+'%"></div></div><span class="day-prog-label">'+done+'/'+total+' · '+pct+'%</span></div>';
+    html += '</div>';
+  });
+  document.getElementById('day-view').innerHTML = html;
+}
+
+function renderPrizes() {
+  const dp = dayPct(activeDay), wp = weekPct(), streak = state.streak;
+
+  // Daily
+  const dailyEarned = dp >= 100;
+  document.getElementById('prize-daily').innerHTML =
+    '<div class="prize-row">'+
+      '<div class="prize-icon">📱</div>'+
+      '<div class="prize-info"><div class="prize-name">+15 min screen time</div><div class="prize-desc">100% of today\'s tasks · '+dp+'% done</div></div>'+
+      '<div class="prize-badge '+(dailyEarned?'badge-earned':'badge-progress')+'">'+(dailyEarned?'✓ Earned!':dp+'%')+'</div>'+
+    '</div>'+
+    '<div class="prize-bar-wrap"><div class="prize-bar"><div class="prize-bar-fill fill-purple" style="width:'+Math.min(dp,100)+'%"></div></div></div>';
+
+  // Weekly
+  const weeklyEarned = wp >= 100;
+  document.getElementById('prize-weekly').innerHTML =
+    '<div class="prize-row">'+
+      '<div class="prize-icon">🍦</div>'+
+      '<div class="prize-info"><div class="prize-name">Movie or ice cream</div><div class="prize-desc">100% of all tasks this week · '+wp+'% done</div></div>'+
+      '<div class="prize-badge '+(weeklyEarned?'badge-earned':'badge-progress')+'">'+(weeklyEarned?'✓ Earned!':wp+'%')+'</div>'+
+    '</div>'+
+    '<div class="prize-bar-wrap"><div class="prize-bar"><div class="prize-bar-fill fill-coral" style="width:'+Math.min(wp,100)+'%"></div></div></div>';
+
+  // Streak
+  const streakPct = Math.min(Math.round(streak/3*100),100);
+  const streakEarned = streak >= 3;
+  const currentAt90 = wp >= 90;
+  const dots = Array.from({length:3},(_,i)=>{
+    if(i<streak) return '<div class="streak-dot filled" title="Week done"></div>';
+    if(i===streak && currentAt90) return '<div class="streak-dot current" title="This week on track!"></div>';
+    return '<div class="streak-dot"></div>';
+  }).join('');
+  document.getElementById('prize-streak').innerHTML =
+    '<div class="prize-row">'+
+      '<div class="prize-icon">🥊</div>'+
+      '<div class="prize-info">'+
+        '<div class="prize-name">New Batting Gloves</div>'+
+        '<div class="prize-desc">3 weeks in a row at 90%+</div>'+
+        '<div class="streak-dots">'+dots+'</div>'+
+      '</div>'+
+      '<div class="prize-badge '+(streakEarned?'badge-earned':'badge-progress')+'">'+(streakEarned?'✓ Earned!':streak+'/3')+'</div>'+
+    '</div>'+
+    '<div class="prize-bar-wrap"><div class="prize-bar"><div class="prize-bar-fill fill-amber" style="width:'+streakPct+'%"></div></div></div>';
+}
+
+function renderAll() { renderTabs(); renderWeekBar(); renderDay(); renderPrizes(); }
+
+// ─── ACTIONS ─────────────────────────────────────────────────────
+function setDay(i) { activeDay = i; renderAll(); }
+
+function toggle(di, i, e) {
+  if (e && e.target.tagName === 'INPUT') return;
+  state.checked[di][i] = !state.checked[di][i];
+  renderAll();
+  saveAll();
+}
+
+function saveAll() { localSave(); syncSave(); }
+
+// ─── PARENT MODE ─────────────────────────────────────────────────
+let pinBuffer = '';
+const CORRECT_PIN = '1986';
+
+function openParent() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-screen').style.display = 'block';
+  document.getElementById('parent-panel').style.display = 'none';
+  document.getElementById('parent-overlay').classList.add('open');
+}
+function closeParent() { document.getElementById('parent-overlay').classList.remove('open'); }
+function overlayClick(e) { if(e.target===document.getElementById('parent-overlay')) closeParent(); }
+
+function pinPress(val) {
+  if (val === 'back') { pinBuffer = pinBuffer.slice(0,-1); }
+  else if (val === 'clear') { pinBuffer = ''; }
+  else if (pinBuffer.length < 4) { pinBuffer += val; }
+  updatePinDots();
+  if (pinBuffer.length === 4) {
+    if (pinBuffer === CORRECT_PIN) {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('parent-panel').style.display = 'block';
+      loadParentFields();
+    } else {
+      document.getElementById('pin-error').textContent = 'Incorrect PIN — try again';
+      setTimeout(() => { pinBuffer=''; updatePinDots(); document.getElementById('pin-error').textContent=''; }, 1000);
+    }
+  }
+}
+function updatePinDots() {
+  for(let i=0;i<4;i++) {
+    document.getElementById('d'+i).className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
+  }
+}
+
+function loadParentFields() {
+  state.chores.forEach((c,i) => { const el = document.getElementById('chore-'+i); if(el) el.value=c; });
+  document.getElementById('irac-topic').value = state.irac || '';
+  document.getElementById('streak-num').textContent = state.streak;
+  document.getElementById('supa-url').value = state.supaUrl || '';
+  document.getElementById('supa-key').value = state.supaKey || '';
+}
+
+function adjustStreak(delta) {
+  state.streak = Math.max(0, Math.min(3, state.streak + delta));
+  document.getElementById('streak-num').textContent = state.streak;
+}
+
+function saveParent() {
+  days.forEach((_,i) => { const el = document.getElementById('chore-'+i); if(el) state.chores[i]=el.value; });
+  state.irac = document.getElementById('irac-topic').value;
+  saveAll();
+  renderAll();
+  closeParent();
+}
+
+async function saveSupabase() {
+  state.supaUrl = document.getElementById('supa-url').value.trim().replace(/\/$/, '');
+  state.supaKey = document.getElementById('supa-key').value.trim();
+  localSave();
+  document.getElementById('sync-status').textContent = 'Connecting...';
+  await syncSave();
+  await syncLoad();
+  renderAll();
+}
+
+// ─── INSTALL PROMPT ──────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'flex';
+});
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('install-banner').style.display = 'none';
+});
+
+// ─── HEADER DATE ─────────────────────────────────────────────────
+function setHeaderDate() {
+  const now = new Date();
+  document.getElementById('header-date').textContent =
+    now.toLocaleDateString('en-US', {weekday:'long', month:'short', day:'numeric'});
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+
+
+// ─── DRILLS DATA ─────────────────────────────────────────────────
+const drillPlans = {
+  'Warmup': {
+    title: 'General Warmup',
+    focus: 'Do this before every hitting session',
+    sections: [{ label: 'Mobility & Activation', drills: [
+      { name:'Knee Pulls', sets:'', reps:'8/each leg', equip:'', note:'' },
+      { name:'Cradle Pull to Forward Lunge with OH Reach', sets:'', reps:'6/each leg', equip:'', note:'Reach up with hands over head and back while you lunge forward' },
+      { name:'Lateral Lunge with Reach', sets:'', reps:'6/each leg', equip:'', note:'Reach straight out, not overhead' },
+      { name:'Inchworm', sets:'', reps:'4', equip:'', note:'' },
+      { name:"Worlds Greatest", sets:'', reps:'3/each side', equip:'', note:'Elbow to inside of ankle, then reach to the sky with the same arm' },
+      { name:'Over/Under Hurdles', sets:'', reps:'3/each direction', equip:'', note:"No hurdles needed — pretend they're there" },
+      { name:"Forward/Backward Pogo's", sets:'', reps:'10 yards', equip:'', note:'' },
+      { name:'A-Skip', sets:'', reps:'10 yards down and back', equip:'', note:'' },
+      { name:'Build Up Sprints', sets:'2 at each level', reps:'30 yards', equip:'', note:'70% → 80% → 90%' },
+    ]}]
+  },
+  'Mon/Fri': {
+    title: 'Bat Speed | Barrel % | Stride Phase',
+    focus: 'Focus on Barrels — Move the bat fast, hit hard in the air to all fields',
+    sections: [
+      { label: 'Tee — Hitting Plyos', drills: [
+        { name:'Offset Rotation', sets:'1x12', reps:'3ea', equip:'Speed Trainers & Game Bat', note:'' },
+        { name:'Step Backs', sets:'1x10', reps:'', equip:'Short Bat', note:'' },
+        { name:'Hook Em', sets:'1x10', reps:'', equip:'Long Bat', note:'' },
+        { name:'Walk Through', sets:'1x12', reps:'3ea', equip:'Speed Trainers & Game Bat', note:'' },
+      ]},
+      { label: 'Front Toss — Baseballs', drills: [
+        { name:'Offset Rotation — Line Drives to CF', sets:'1x10', reps:'5ea', equip:'Barrel Load & Handle Load', note:'' },
+        { name:'Hook Em — Line Drives Pull Gap', sets:'1x10', reps:'5ea', equip:'Barrel Load & Handle Load', note:'' },
+        { name:'Step Back Pivot Pick — HRs Pull Side', sets:'1x9', reps:'3ea', equip:'Speed Trainers', note:'' },
+        { name:'Home Run Derby', sets:'1x10', reps:'', equip:'Underload & Game Bat', note:'' },
+      ]},
+    ]
+  },
+  'Wed': {
+    title: 'Bat Speed | Game Swings',
+    focus: '3-0 green light — Move the bat as fast as possible from your game swing',
+    sections: [
+      { label: 'Tee — Hitting Plyos', drills: [
+        { name:'Offset Rotation', sets:'1x12', reps:'3ea', equip:'Speed Trainers & Game Bat', note:'' },
+        { name:'Step Backs', sets:'1x10', reps:'5ea', equip:'Barrel Load & Handle Load', note:'' },
+        { name:'Hook Em', sets:'1x9', reps:'3ea', equip:'Speed Trainers', note:'' },
+        { name:'Walk Through', sets:'1x12', reps:'3ea', equip:'Speed Trainers & Game Bat', note:'' },
+      ]},
+      { label: 'Front Toss — Game Swings', drills: [
+        { name:'Game Swings', sets:'1x8', reps:'', equip:'Barrel Load', note:'"Wear your blast and tag each bat"' },
+        { name:'Game Swings', sets:'1x8', reps:'', equip:'Handle Load', note:'"Wear your blast and tag each bat"' },
+        { name:'Game Swings', sets:'1x8', reps:'', equip:'Underload', note:'"Wear your blast and tag each bat"' },
+        { name:'Game Swings', sets:'1x10', reps:'', equip:'Game Bat', note:'"Wear your blast and tag each bat"' },
+      ]},
+    ]
+  },
+};
+
+let activeDrillPlan = 'Warmup';
+const drillChecked = {};
+Object.keys(drillPlans).forEach(day => {
+  drillChecked[day] = {};
+  let i = 0;
+  drillPlans[day].sections.forEach(s => s.drills.forEach(() => { drillChecked[day][i++] = false; }));
+});
+
+function drillTotal(day) { return Object.keys(drillChecked[day]).length; }
+function drillDone(day) { return Object.values(drillChecked[day]).filter(Boolean).length; }
+
+function renderDrills() {
+  const plan = drillPlans[activeDrillPlan];
+  let html = '<div class="drill-day-tabs">';
+  Object.keys(drillPlans).forEach(day => {
+    const done = drillDone(day), total = drillTotal(day);
+    html += "<button class='drill-day-tab"+(day===activeDrillPlan?' active':'')+"' onclick='setDrillDay(this.getAttribute(\"data-d\"))' data-d='"+day+"'>"+day+" <span style='font-size:10px;opacity:0.7'>"+done+"/"+total+"</span></button>";
+  });
+  html += '</div>';
+  html += '<div class="drill-plan-title">'+plan.title+'</div>';
+  html += '<div class="drill-plan-focus">'+plan.focus+'</div>';
+  let idx = 0;
+  plan.sections.forEach(s => {
+    html += '<div class="drill-card"><div class="drill-section-hdr">'+s.label+'</div>';
+    s.drills.forEach(d => {
+      const i = idx++, done = drillChecked[activeDrillPlan][i];
+      html += "<div class='drill-row"+(done?' done':'')+"' onclick='toggleDrill(this.getAttribute(\"data-plan\"),"+i+")' data-plan='"+activeDrillPlan+"'>";
+      html += '<div class="drill-cb"><span class="drill-cb-check">✓</span></div>';
+      html += '<div class="drill-info"><div class="drill-name">'+d.name+'</div>';
+      if (d.note) html += '<div class="drill-note">'+d.note+'</div>';
+      html += '<div class="drill-meta">';
+      if (d.sets) html += '<span class="drill-tag drill-sets">'+d.sets+'</span>';
+      if (d.reps) html += '<span class="drill-tag drill-reps">'+d.reps+'</span>';
+      if (d.equip) html += '<span class="drill-tag drill-equip">'+d.equip+'</span>';
+      html += '</div></div></div>';
+    });
+    const done=drillDone(activeDrillPlan),total=drillTotal(activeDrillPlan),pct=total?Math.round(done/total*100):0;
+    html += '<div class="drill-prog-row"><div class="drill-prog-bar"><div class="drill-prog-fill" style="width:'+pct+'%"></div></div><span class="drill-prog-label">'+done+'/'+total+' · '+pct+'%</span></div>';
+    html += '</div>';
+  });
+  document.getElementById('drills-inner').innerHTML = html;
+}
+
+function setDrillDay(day) { activeDrillPlan = day; renderDrills(); }
+function toggleDrill(day, i) { drillChecked[day][i]=!drillChecked[day][i]; renderDrills(); localSave(); }
+
+// ─── LIFT DATA ───────────────────────────────────────────────────
+const liftPlans = {
+  'Lift 1': {
+    title: 'Workout 1 — Tue/Fri',
+    focus: 'Mon = strength coach. Tue & Fri = this workout.',
+    sections: [{ label: 'Superset A', drills: [
+      { name:'Broad Jump to Vertical Jump', sets:'3', reps:'3', equip:'A1', note:'' },
+      { name:'Medicine Ball Overhead Slam to Scoop Toss', sets:'3', reps:'4/side', equip:'4-6 lbs, A2', note:'Do a scoop toss instead of shotput. Rest 30s.' },
+    ]},{ label: 'Superset B', drills: [
+      { name:'Jammer Arm Bench Press', sets:'3', reps:'6', equip:'2 RIR, B1', note:'' },
+      { name:'Landmine BB RDL', sets:'3', reps:'5', equip:'2 RIR, B2', note:'Rest 45s.' },
+    ]},{ label: 'Superset C', drills: [
+      { name:'Split Stance 1-Arm Cable Row', sets:'3', reps:'6/side', equip:'2 RIR, C1', note:'Use cable rack instead of band.' },
+      { name:'Suitcase Carries', sets:'3', reps:'15 yards each arm', equip:'2 RIR, C2', note:'Rest 45s.' },
+    ]}]
+  },
+  'Lift 2': {
+    title: 'Workout 2 — Wed',
+    focus: 'Wednesday lift — 6 exercises, 3 supersets',
+    sections: [{ label: 'Superset A', drills: [
+      { name:'Depth Drop to Broad Jump', sets:'3', reps:'3', equip:'A1', note:'' },
+      { name:'MB Vertical Scoop Toss', sets:'3', reps:'4/side', equip:'6-8 lbs, A2', note:'Rest 30s.' },
+    ]},{ label: 'Superset B', drills: [
+      { name:'DB Goblet Squat', sets:'3', reps:'6', equip:'2 RIR, B1', note:'' },
+      { name:'Pull Up', sets:'3', reps:'5', equip:'2 RIR, B2', note:'Use band for assistance if needed. Rest 45s.' },
+    ]},{ label: 'Superset C', drills: [
+      { name:'Weighted Dead Bugs', sets:'3', reps:'6/side', equip:'2 RIR, C1', note:'' },
+      { name:'Yoga Pushup', sets:'3', reps:'6', equip:'2 RIR, C2', note:'Rest 45s.' },
+    ]}]
+  },
+  'Lift 3': {
+    title: 'Workout 3 — Thu',
+    focus: 'Thursday lift — 6 exercises, 3 supersets',
+    sections: [{ label: 'Superset A', drills: [
+      { name:'Lateral Hurdle Hop to Broad Jump', sets:'3', reps:'3/side', equip:'A1', note:'Use the small hurdle.' },
+      { name:'Medicine Ball Step Back Scoop Toss', sets:'3', reps:'4/side', equip:'4-6 lbs, A2', note:'Rest 30s.' },
+    ]},{ label: 'Superset B', drills: [
+      { name:'DB Floor Press', sets:'3', reps:'6', equip:'2 RIR, B1', note:'' },
+      { name:'Kickstand KB RDLs', sets:'3', reps:'5/side', equip:'2 RIR, B2', note:'Rest 45s.' },
+    ]},{ label: 'Superset C', drills: [
+      { name:'Pallof Press', sets:'3', reps:'6/side', equip:'2 RIR, C1', note:'' },
+      { name:'Inverted Row', sets:'3', reps:'6', equip:'2 RIR, C2', note:'Rest 45s.' },
+    ]}]
+  },
+  'Speed 1': {
+    title: 'Speed/Plyo 1',
+    focus: 'Explosiveness and first-step quickness',
+    sections: [{ label: 'Speed & Plyo', drills: [
+      { name:'Pogo Hops', sets:'2', reps:'6', equip:'A1', note:'' },
+      { name:'A-Skip', sets:'2', reps:'10 yards', equip:'A2', note:'' },
+      { name:'Depth Jump', sets:'2', reps:'3', equip:'B1', note:'' },
+      { name:'Push-up Sprint Start', sets:'3', reps:'5-10 yards', equip:'B2', note:'1 min between sets.' },
+      { name:'3 Cone Sprint-Backpedal-Sprint', sets:'3', reps:'Full drill', equip:'C1', note:'2 min between sets.' },
+    ]}]
+  },
+  'Speed 2': {
+    title: 'Speed/Plyo 2',
+    focus: 'Lateral movement and tempo running',
+    sections: [{ label: 'Speed & Agility', drills: [
+      { name:'Reverse Pogo Hops', sets:'2', reps:'20', equip:'A1', note:'' },
+      { name:'Forward Pogo Hop', sets:'2', reps:'20', equip:'A2', note:'' },
+      { name:'Rhythmic Skips', sets:'2', reps:'20 yards', equip:'A3', note:'' },
+      { name:'Left-Left-Right-Right Rudiment Hop Series', sets:'2', reps:'10 yards', equip:'B1', note:'' },
+      { name:'Shuffles', sets:'2', reps:'20 yards each', equip:'B2', note:'' },
+      { name:'Tempo Runs', sets:'4', reps:'40 yards', equip:'C1', note:'~70% effort. Can do shoeless. 2 min rest.' },
+    ]}]
+  },
+};
+
+const liftChecked = {};
+Object.keys(liftPlans).forEach(day => {
+  liftChecked[day] = {};
+  let i = 0;
+  liftPlans[day].sections.forEach(s => s.drills.forEach(() => { liftChecked[day][i++] = false; }));
+});
+let activeLiftPlan = 'Lift 1';
+
+function liftTotal(day) { return Object.keys(liftChecked[day]).length; }
+function liftDone(day) { return Object.values(liftChecked[day]).filter(Boolean).length; }
+
+function renderLift() {
+  const plan = liftPlans[activeLiftPlan];
+  let html = '<div class="drill-day-tabs">';
+  Object.keys(liftPlans).forEach(day => {
+    const done = liftDone(day), total = liftTotal(day);
+    html += "<button class='drill-day-tab"+(day===activeLiftPlan?' active':'')+"' onclick='setLiftDay(this.getAttribute(\"data-d\"))' data-d='"+day+"'>"+day+" <span style='font-size:10px;opacity:0.7'>"+done+"/"+total+"</span></button>";
+  });
+  html += '</div>';
+  html += '<div class="drill-plan-title">'+plan.title+'</div>';
+  html += '<div class="drill-plan-focus">'+plan.focus+'</div>';
+  let idx = 0;
+  plan.sections.forEach(s => {
+    html += '<div class="drill-card"><div class="drill-section-hdr">'+s.label+'</div>';
+    s.drills.forEach(d => {
+      const i = idx++, done = liftChecked[activeLiftPlan][i];
+      html += "<div class='drill-row"+(done?' done':'')+"' onclick='toggleLift(this.getAttribute(\"data-plan\"),"+i+")' data-plan='"+activeLiftPlan+"'>";
+      html += '<div class="drill-cb"><span class="drill-cb-check">✓</span></div>';
+      html += '<div class="drill-info"><div class="drill-name">'+d.name+'</div>';
+      if (d.note) html += '<div class="drill-note">'+d.note+'</div>';
+      html += '<div class="drill-meta">';
+      if (d.sets) html += '<span class="drill-tag drill-sets">'+d.sets+' sets</span>';
+      if (d.reps) html += '<span class="drill-tag drill-reps">'+d.reps+'</span>';
+      if (d.equip) html += '<span class="drill-tag drill-equip">'+d.equip+'</span>';
+      html += '</div></div></div>';
+    });
+    const done=liftDone(activeLiftPlan),total=liftTotal(activeLiftPlan),pct=total?Math.round(done/total*100):0;
+    html += '<div class="drill-prog-row"><div class="drill-prog-bar"><div class="drill-prog-fill" style="width:'+pct+'%"></div></div><span class="drill-prog-label">'+done+'/'+total+' · '+pct+'%</span></div>';
+    html += '</div>';
+  });
+  document.getElementById('lift-inner').innerHTML = html;
+}
+
+function setLiftDay(day) { activeLiftPlan = day; renderLift(); }
+function toggleLift(day, i) { liftChecked[day][i]=!liftChecked[day][i]; renderLift(); localSave(); }
+
+// ─── THROWING DATA ────────────────────────────────────────────────
+const throwingPlans = {
+  'Recovery': {
+    title: 'Recovery Throwing — 50-60%',
+    focus: 'Light day. Max intensity 60%. Focus on feel and arm care.',
+    sections: [{ label: 'Arm Care & Throwing', drills: [
+      { name:'J-Band Series', sets:'1', reps:'10 per exercise', equip:'', note:'' },
+      { name:'Wrist Weight Series', sets:'1', reps:'10 per exercise', equip:'2.5 kg', note:'' },
+      { name:'PlyoCare Reverse Throws', sets:'1', reps:'10 reps', equip:'450g (blue)', note:'' },
+      { name:'PlyoCare Pivot Pickoffs', sets:'1', reps:'10 reps', equip:'350g (orange) & 225g (red)', note:'' },
+      { name:'Leather Weighted Ball Catch Play', sets:'1', reps:'5 throws each', equip:'7oz & 6oz', note:'' },
+      { name:'Light Catch Play', sets:'1', reps:'20 throws', equip:'', note:'Max distance: 100 feet.' },
+      { name:'Throwing Notes', sets:'', reps:'', equip:'', note:'What did you work on today?' },
+    ]}]
+  },
+  'Hybrid': {
+    title: 'Hybrid Throwing — 70-80%',
+    focus: 'Moderate intensity. RI & DS approach.',
+    sections: [{ label: 'Arm Care & Throwing', drills: [
+      { name:'Resistance Band Series', sets:'1', reps:'10 per exercise', equip:'', note:'' },
+      { name:'Wrist Weight Series', sets:'1', reps:'10 per exercise', equip:'2.5 kg', note:'' },
+      { name:'PlyoCare Reverse Throws', sets:'1', reps:'10 reps', equip:'450g (blue)', note:'' },
+      { name:'PlyoCare Pivot Pickoffs', sets:'1', reps:'10 reps', equip:'350g (orange) & 275g (purple)', note:'' },
+      { name:'PlyoCare Roll-ins', sets:'1', reps:'5 reps', equip:'275g (purple) & 225g (red)', note:'' },
+      { name:'PlyoCare Step Backs / Drop Steps', sets:'2', reps:'1 rep each weight', equip:'225g, 150g, 125g', note:'' },
+      { name:'PlyoCare Walking Windups', sets:'2', reps:'1 rep each weight', equip:'225g, 150g, 125g', note:'' },
+      { name:'Leather Weighted Ball Catch Play', sets:'1', reps:'5 throws each', equip:'9oz, 7oz, 6oz', note:'' },
+      { name:'Compression Long Toss Catch Play', sets:'1', reps:'Long toss + 5-6 compression throws', equip:'', note:'Max distance: 200 feet.' },
+      { name:'Throwing Notes', sets:'', reps:'', equip:'', note:'What did you work on today?' },
+    ]}]
+  },
+  'Velo': {
+    title: 'Velocity Throwing',
+    focus: 'High intent day. Focus on arm speed and extension.',
+    sections: [{ label: 'Velo Protocol', drills: [
+      { name:'J-Band Series', sets:'1', reps:'10 per exercise', equip:'', note:'' },
+      { name:'PlyoCare Reverse Throws', sets:'1', reps:'10 reps', equip:'450g (blue)', note:'' },
+      { name:'PlyoCare Pivot Pickoffs', sets:'1', reps:'10 reps', equip:'350g orange & 225g red', note:'' },
+      { name:'PlyoCare Walking Windups', sets:'2', reps:'1 rep each weight', equip:'225g, 150g, 125g', note:'' },
+      { name:'Leather Weighted Ball Catch Play', sets:'1', reps:'5 throws each', equip:'9oz, 7oz, 6oz', note:'' },
+      { name:'Compression Long Toss Catch Play', sets:'1', reps:'Long toss + 5-6 compression throws', equip:'', note:'Max distance: 200 feet.' },
+      { name:'Throwing Notes', sets:'', reps:'', equip:'', note:'What did you work on today?' },
+    ]}]
+  },
+};
+
+const throwingChecked = {};
+Object.keys(throwingPlans).forEach(day => {
+  throwingChecked[day] = {};
+  let i = 0;
+  throwingPlans[day].sections.forEach(s => s.drills.forEach(() => { throwingChecked[day][i++] = false; }));
+});
+let activeThrowingPlan = 'Recovery';
+
+function throwingTotal(day) { return Object.keys(throwingChecked[day]).length; }
+function throwingDone(day) { return Object.values(throwingChecked[day]).filter(Boolean).length; }
+
+function renderThrowing() {
+  const plan = throwingPlans[activeThrowingPlan];
+  let html = '<div class="drill-day-tabs">';
+  Object.keys(throwingPlans).forEach(day => {
+    const done = throwingDone(day), total = throwingTotal(day);
+    html += "<button class='drill-day-tab"+(day===activeThrowingPlan?' active':'')+"' onclick='setThrowingDay(this.getAttribute(\"data-d\"))' data-d='"+day+"'>"+day+" <span style='font-size:10px;opacity:0.7'>"+done+"/"+total+"</span></button>";
+  });
+  html += '</div>';
+  html += '<div class="drill-plan-title">'+plan.title+'</div>';
+  html += '<div class="drill-plan-focus">'+plan.focus+'</div>';
+  let idx = 0;
+  plan.sections.forEach(s => {
+    html += '<div class="drill-card"><div class="drill-section-hdr">'+s.label+'</div>';
+    s.drills.forEach(d => {
+      const i = idx++, done = throwingChecked[activeThrowingPlan][i];
+      html += "<div class='drill-row"+(done?' done':'')+"' onclick='toggleThrowing(this.getAttribute(\"data-plan\"),"+i+")' data-plan='"+activeThrowingPlan+"'>";
+      html += '<div class="drill-cb"><span class="drill-cb-check">✓</span></div>';
+      html += '<div class="drill-info"><div class="drill-name">'+d.name+'</div>';
+      if (d.note) html += '<div class="drill-note">'+d.note+'</div>';
+      html += '<div class="drill-meta">';
+      if (d.sets) html += '<span class="drill-tag drill-sets">'+d.sets+' sets</span>';
+      if (d.reps) html += '<span class="drill-tag drill-reps">'+d.reps+'</span>';
+      if (d.equip) html += '<span class="drill-tag drill-equip">'+d.equip+'</span>';
+      html += '</div></div></div>';
+    });
+    const done=throwingDone(activeThrowingPlan),total=throwingTotal(activeThrowingPlan),pct=total?Math.round(done/total*100):0;
+    html += '<div class="drill-prog-row"><div class="drill-prog-bar"><div class="drill-prog-fill" style="width:'+pct+'%"></div></div><span class="drill-prog-label">'+done+'/'+total+' · '+pct+'%</span></div>';
+    html += '</div>';
+  });
+  document.getElementById('throwing-inner').innerHTML = html;
+}
+
+function setThrowingDay(day) { activeThrowingPlan = day; renderThrowing(); }
+function toggleThrowing(day, i) { throwingChecked[day][i]=!throwingChecked[day][i]; renderThrowing(); localSave(); }
+
+// ─── VIEW SWITCHER ────────────────────────────────────────────────
+let currentView = 'schedule';
+function switchView(view) {
+  currentView = view;
+  const views = ['schedule','drills','lift','throwing'];
+  views.forEach(v => {
+    if (v === 'schedule') {
+      document.querySelector('.main').style.display = v===view ? 'block' : 'none';
+    } else {
+      const el = document.getElementById(v+'-view');
+      if (el) el.style.display = v===view ? 'block' : 'none';
+    }
+    const nav = document.getElementById('nav-'+v);
+    if (nav) nav.className = 'nav-tab'+(v===view?' active':'');
+  });
+  if (view==='drills') renderDrills();
+  else if (view==='lift') renderLift();
+  else if (view==='throwing') renderThrowing();
+}
+
+localLoad();
+setHeaderDate();
+renderAll();
+// Pre-render all tab content
+renderDrills();
+renderLift();
+renderThrowing();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+syncLoad().then(() => renderAll());
+</script>
+</body>
+</html>
